@@ -35,6 +35,14 @@ $(document).ready(function() {
 
 
 <div class="row">
+	@if(Session::has('missing'))
+		<div class="alert alert-danger alert-dismissible fade in col-lg-8" role="alert">
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+        <strong>{{{ Session::get('missing') }}}</strong> 
+    </div> 	
+	@endif
   <div class="col-lg-5">
 
     

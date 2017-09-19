@@ -63,20 +63,21 @@ class PaymentsController extends \BaseController {
 			return Redirect::back()->withErrors($validator)->withInput();
 		}
 
-		//$erporder = Erporder::find(Input::get('order'));
-
-		$payment = new Payment;
+		$erporder = Client::find(Input::get('order'));
+		/*Get the last erp order id for the client and then plunge it into payments ralation*/
+		$getid=Erporder::where('client_id','=',Input::get('order'))->orderBy('id','DESC')->first();		
+		if($getid!=null){
+		   $payment = new Payment;
 
 		$client = Client::findOrFail(Input::get('order'));
 		$payment->client_id = Input::get('order');
-		$payment->erporder_id = Input::get('order');
+		$payment->erporder_id =$getid->id;
 		$payment->amount_paid = Input::get('amount');	
 		$payment->paymentmethod_id = Input::get('paymentmethod');
 		$payment->account_id = Input::get('account');
 		$payment->received_by = Input::get('received_by');
 		$payment->payment_date = date("Y-m-d",strtotime(Input::get('pay_date')));
 		$payment->save();
-
 		
 		if($client->type === 'Customer'){
 			Account::where('id', Input::get('paymentmethod'))->increment('balance', Input::get('amount'));	
@@ -84,7 +85,12 @@ class PaymentsController extends \BaseController {
 			Account::where('id', Input::get('paymentmethod'))->decrement('balance', Input::get('amount'));
 		}
 
-         
+
+		}else{
+		   return Redirect::back()->withMissing("Payment Failure. There are no order records for this client.");
+		}
+				
+		         
        /* if($client->type=='Customer'){
          DB::table('accounts')
             ->join('payments','accounts.id','=','payments.account_id')
